@@ -1,5 +1,5 @@
 {
-  "exe": "my_sample",
+  "exe": "my_sgx",
   "key": "private.pem",
   "debug": true,
   "heapSize": 512,

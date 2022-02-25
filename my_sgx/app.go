@@ -33,6 +33,8 @@ func main() {
 		verifyReport()
 	case "make-encrypt-data":
 		makeEncryptData()
+	case "decrypt-data":
+		decryptData()
 	default:
 		panic("command is invalid.(check-path, create-key, get-pubkey, get-report, verify-report)")
 	}
@@ -82,6 +84,14 @@ func createKey() {
 }
 
 func getPubkey() {
+	privKeyBytes := getPrivkeyFromSeal()
+
+	_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), privKeyBytes)
+
+	fmt.Println(base64.StdEncoding.EncodeToString(pubKey.SerializeCompressed()))
+}
+
+func getPrivkeyFromSeal() []byte {
 	file, err := ioutil.ReadFile(defaultSealPath)
 	if err != nil {
 		panic(fmt.Errorf("you have to run 'create-key' first. %e", err))
@@ -92,9 +102,7 @@ func getPubkey() {
 		panic(err)
 	}
 
-	_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), privKeyBytes)
-
-	fmt.Println(base64.StdEncoding.EncodeToString(pubKey.SerializeCompressed()))
+	return privKeyBytes
 }
 
 func getReport() {
@@ -141,27 +149,27 @@ func verifyReport() {
 		panic(err)
 	}
 
-	fmt.Println("##Report##")
+	fmt.Println("## Report ##")
 	fmt.Println(fmt.Sprintf("SignerId: %s", hex.EncodeToString(report.SignerID)))
 	fmt.Println(fmt.Sprintf("TCBStatus: %s", report.TCBStatus))
-	fmt.Println(fmt.Sprintf("UniqueID: %s", string(report.UniqueID)))
+	fmt.Println(fmt.Sprintf("UniqueID: %s", base64.StdEncoding.EncodeToString(report.UniqueID)))
 
-	fmt.Println("pubkey verification")
+	fmt.Println("## pubkey verification ##")
 	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:len(pubkeyBytes)])))
 	if !bytes.Equal(pubkeyBytes, report.Data[:len(pubkeyBytes)]) {
 		panic(errors.New("report data does not match the certificate's hash"))
 	}
 	fmt.Println("success")
 
-	fmt.Println("security version verification")
+	fmt.Println("## security version verification ##")
 	fmt.Println(fmt.Sprintf("SecurityVersion: %v", report.SecurityVersion))
 	if report.SecurityVersion != 3 {
 		panic(errors.New("security version does not match the certificate's version"))
 	}
 	fmt.Println("success")
 
-	fmt.Println("productID verification")
-	fmt.Println(fmt.Sprintf("ProductID: %s", string(report.ProductID)))
+	fmt.Println("## productID verification ##")
+	fmt.Println(fmt.Sprintf("ProductID: %v", binary.LittleEndian.Uint16(report.ProductID)))
 	if binary.LittleEndian.Uint16(report.ProductID) != 111 {
 		panic(errors.New("productID does not match the certificate's productId"))
 	}
@@ -188,4 +196,26 @@ func makeEncryptData() {
 	}
 
 	fmt.Println(base64.StdEncoding.EncodeToString(encBytes))
+}
+
+func decryptData() {
+	cipherTextBase64 := os.Args[2]
+	if cipherTextBase64 == "" {
+		panic(errors.New("cipherText is empty"))
+	}
+
+	cipherTextBytes, err := base64.StdEncoding.DecodeString(cipherTextBase64)
+	if err != nil {
+		panic(err)
+	}
+
+	privKeyBytes := getPrivkeyFromSeal()
+	privkey, _ := btcec.PrivKeyFromBytes(btcec.S256(), privKeyBytes)
+
+	plainTextBytes, err := btcec.Decrypt(privkey, cipherTextBytes)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(plainTextBytes))
 }

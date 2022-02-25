@@ -141,11 +141,11 @@ func verifyReport() {
 	}
 
 	fmt.Println("##Report##")
-	fmt.Println(fmt.Sprintf("SignerId: %s", string(report.SignerID)))
+	fmt.Println(fmt.Sprintf("SignerId: %s", base64.StdEncoding.EncodeToString(report.SignerID)))
 	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:len(pubkeyBytes)])))
 	fmt.Println(fmt.Sprintf("TCBStatus: %s", report.TCBStatus))
-	fmt.Println(fmt.Sprintf("UniqueID: %s", report.UniqueID))
-	fmt.Println(fmt.Sprintf("ProductID: %s", report.ProductID))
+	fmt.Println(fmt.Sprintf("UniqueID: %s", string(report.UniqueID)))
+	fmt.Println(fmt.Sprintf("ProductID: %s", string(report.ProductID)))
 
 	if !bytes.Equal(pubkeyBytes, report.Data[:len(pubkeyBytes)]) {
 		panic(errors.New("report data does not match the certificate's hash"))

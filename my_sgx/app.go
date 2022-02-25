@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/btcsuite/btcd/btcec"
@@ -141,23 +142,30 @@ func verifyReport() {
 	}
 
 	fmt.Println("##Report##")
-	fmt.Println(fmt.Sprintf("SignerId: %s", base64.StdEncoding.EncodeToString(report.SignerID)))
-	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:len(pubkeyBytes)])))
+	fmt.Println(fmt.Sprintf("SignerId: %s", hex.EncodeToString(report.SignerID)))
 	fmt.Println(fmt.Sprintf("TCBStatus: %s", report.TCBStatus))
 	fmt.Println(fmt.Sprintf("UniqueID: %s", string(report.UniqueID)))
-	fmt.Println(fmt.Sprintf("ProductID: %s", string(report.ProductID)))
 
+	fmt.Println("pubkey verification")
+	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:len(pubkeyBytes)])))
 	if !bytes.Equal(pubkeyBytes, report.Data[:len(pubkeyBytes)]) {
 		panic(errors.New("report data does not match the certificate's hash"))
 	}
+	fmt.Println("success")
 
+	fmt.Println("security version verification")
+	fmt.Println(fmt.Sprintf("SecurityVersion: %v", report.SecurityVersion))
 	if report.SecurityVersion != 3 {
 		panic(errors.New("security version does not match the certificate's version"))
 	}
+	fmt.Println("success")
 
+	fmt.Println("productID verification")
+	fmt.Println(fmt.Sprintf("ProductID: %s", string(report.ProductID)))
 	if binary.LittleEndian.Uint16(report.ProductID) != 111 {
-		panic(errors.New("security version does not match the certificate's productId"))
+		panic(errors.New("productID does not match the certificate's productId"))
 	}
+	fmt.Println("success")
 }
 
 func makeEncryptData() {

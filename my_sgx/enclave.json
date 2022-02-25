@@ -4,5 +4,13 @@
   "debug": true,
   "heapSize": 512,
   "productID": 111,
-  "securityVersion": 3
+  "securityVersion": 3,
+  "mounts": [
+    {
+      "source": "/home/gyuguen.jang/workspace",
+      "target": "/data",
+      "type": "hostfs",
+      "readOnly": false
+    }
+  ]
 }

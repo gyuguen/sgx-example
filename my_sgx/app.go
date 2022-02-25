@@ -26,22 +26,15 @@ func main() {
 		createKey()
 	case "get-pubkey":
 		getPubkey()
+	case "get-report":
+		getReport()
+	case "verify-report":
+		verifyReport()
+	case "make-encrypt-data":
+		makeEncryptData()
 	default:
-		panic("command is invalid.(check-path, create-key, get-pubkey)")
+		panic("command is invalid.(check-path, create-key, get-pubkey, get-report, verify-report)")
 	}
-
-	/*reportBytes, err := enclave.GetRemoteReport(pubKey.SerializeCompressed())
-
-	if err != nil {
-		panic(err)
-	}
-
-	if err := verifyReport(reportBytes, pubKey.SerializeCompressed()); err != nil {
-		panic(err)
-	}*/
-
-	//encText := getEncTextFromExternal()
-
 }
 
 func checkPath() {
@@ -103,29 +96,88 @@ func getPubkey() {
 	fmt.Println(base64.StdEncoding.EncodeToString(pubKey.SerializeCompressed()))
 }
 
-func verifyReport(reportBytes []byte, pubKey []byte) error {
-	report, err := enclave.VerifyRemoteReport(reportBytes)
-
+func getReport() {
+	pubkeyBase64 := os.Args[2]
+	if pubkeyBase64 == "" {
+		panic(errors.New("pubkey is empty"))
+	}
+	pubkeyBytes, err := base64.StdEncoding.DecodeString(pubkeyBase64)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	fmt.Println(string(report.SignerID))
-	fmt.Println(pubKey)
-	fmt.Println(report.Data[:len(pubKey)])
-	fmt.Println(report.TCBStatus)
+	reportBytes, err := enclave.GetRemoteReport(pubkeyBytes)
+	if err != nil {
+		panic(err)
+	}
 
-	if !bytes.Equal(pubKey, report.Data[:len(pubKey)]) {
-		return errors.New("report data does not match the certificate's hash")
+	fmt.Println(base64.StdEncoding.EncodeToString(reportBytes))
+}
+
+func verifyReport() {
+	reportBase64 := os.Args[2]
+	if reportBase64 == "" {
+		panic(errors.New("you should be input {report} {pubkey}"))
+	}
+
+	pubkeyBase64 := os.Args[3]
+	if pubkeyBase64 == "" {
+		panic(errors.New("you should be input {report} {pubkey}"))
+	}
+
+	reportBytes, err := base64.StdEncoding.DecodeString(reportBase64)
+	if err != nil {
+		panic(err)
+	}
+
+	report, err := enclave.VerifyRemoteReport(reportBytes)
+	if err != nil {
+		panic(err)
+	}
+
+	pubkeyBytes, err := base64.StdEncoding.DecodeString(pubkeyBase64)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("##Report##")
+	fmt.Println(fmt.Sprintf("SignerId: %s", string(report.SignerID)))
+	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:len(pubkeyBytes)])))
+	fmt.Println(fmt.Sprintf("TCBStatus: %s", report.TCBStatus))
+	fmt.Println(fmt.Sprintf("UniqueID: %s", report.UniqueID))
+	fmt.Println(fmt.Sprintf("ProductID: %s", report.ProductID))
+
+	if !bytes.Equal(pubkeyBytes, report.Data[:len(pubkeyBytes)]) {
+		panic(errors.New("report data does not match the certificate's hash"))
 	}
 
 	if report.SecurityVersion != 3 {
-		return errors.New("security version does not match the certificate's version")
+		panic(errors.New("security version does not match the certificate's version"))
 	}
 
 	if binary.LittleEndian.Uint16(report.ProductID) != 111 {
-		return errors.New("security version does not match the certificate's productId")
+		panic(errors.New("security version does not match the certificate's productId"))
+	}
+}
+
+func makeEncryptData() {
+	plainText := os.Args[2]
+	if plainText == "" {
+		panic(errors.New("you should be input {text} {pubkey}"))
+	}
+	pubkeyBase64 := os.Args[3]
+	if pubkeyBase64 == "" {
+		panic(errors.New("pubkey is empty"))
+	}
+	pubkeyBytes, err := base64.StdEncoding.DecodeString(pubkeyBase64)
+	if err != nil {
+		panic(err)
 	}
 
-	return nil
+	encBytes, err := crypto.EncryptData(pubkeyBytes, []byte(plainText))
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(base64.StdEncoding.EncodeToString(encBytes))
 }

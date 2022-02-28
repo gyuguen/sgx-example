@@ -106,16 +106,11 @@ func getPrivkeyFromSeal() []byte {
 }
 
 func getReport() {
-	pubkeyBase64 := os.Args[2]
-	if pubkeyBase64 == "" {
-		panic(errors.New("pubkey is empty"))
-	}
-	pubkeyBytes, err := base64.StdEncoding.DecodeString(pubkeyBase64)
-	if err != nil {
-		panic(err)
-	}
+	privKeyBytes := getPrivkeyFromSeal()
 
-	reportBytes, err := enclave.GetRemoteReport(pubkeyBytes)
+	_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), privKeyBytes)
+
+	reportBytes, err := enclave.GetRemoteReport(pubKey.SerializeCompressed())
 	if err != nil {
 		panic(err)
 	}

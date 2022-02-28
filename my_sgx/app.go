@@ -53,6 +53,7 @@ func checkPath() {
 		panic(err)
 	}
 	fmt.Println(fmt.Sprintf("Files: %v", files))
+
 }
 
 func createKey() {

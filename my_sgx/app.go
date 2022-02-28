@@ -53,7 +53,6 @@ func checkPath() {
 		panic(err)
 	}
 	fmt.Println(fmt.Sprintf("Files: %v", files))
-
 }
 
 func createKey() {
@@ -174,7 +173,7 @@ func verifyReport() {
 	if binary.LittleEndian.Uint16(report.ProductID) != 111 {
 		panic(errors.New("productID does not match the certificate's productId"))
 	}
-	fmt.Println("success")
+	fmt.Println("success!!")
 }
 
 func makeEncryptData() {

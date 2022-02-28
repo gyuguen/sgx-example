@@ -147,7 +147,7 @@ func verifyReport() {
 	fmt.Println("## Report ##")
 	fmt.Println(fmt.Sprintf("SignerId: %s", hex.EncodeToString(report.SignerID)))
 	fmt.Println(fmt.Sprintf("TCBStatus: %s", report.TCBStatus))
-	fmt.Println(fmt.Sprintf("UniqueID: %s", base64.StdEncoding.EncodeToString(report.UniqueID)))
+	fmt.Println(fmt.Sprintf("UniqueID: %s", hex.EncodeToString(report.UniqueID)))
 
 	fmt.Println("## pubkey verification ##")
 	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:len(pubkeyBytes)])))

@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	reportBase64 := os.Args[2]
+	reportBase64 := os.Args[1]
 	if reportBase64 == "" {
 		panic(errors.New("you should be input {report} {pubkey}"))
 	}

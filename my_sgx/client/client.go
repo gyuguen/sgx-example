@@ -48,7 +48,7 @@ func VerifyReportClient() {
 	fmt.Println(fmt.Sprintf("TCBStatus: %v", report.TCBStatus))
 	fmt.Println(fmt.Sprintf("UniqueID: %v", hex.EncodeToString(report.UniqueID)))
 	fmt.Println(fmt.Sprintf("ProductID: %v", binary.LittleEndian.Uint16(report.ProductID)))
-	fmt.Println(fmt.Sprintf("PubKey: %v", base64.StdEncoding.EncodeToString(report.Data))
+	fmt.Println(fmt.Sprintf("PubKey: %v", base64.StdEncoding.EncodeToString(report.Data)))
 
 	fmt.Println("")
 	fmt.Println("Check report value")

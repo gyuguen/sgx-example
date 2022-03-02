@@ -28,6 +28,9 @@ func main() {
 	pubkey := flag.String("pubkey", "", "PubKey")
 	flag.Parsed()
 
+	fmt.Println(fmt.Sprintf("signerID: %v",signerID))
+	fmt.Println(fmt.Sprintf("pubkey: %v",pubkey))
+
 	report, err := eclient.VerifyRemoteReport(reportBytes)
 	if err != nil {
 		panic(err)

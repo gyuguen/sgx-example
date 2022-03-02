@@ -18,6 +18,8 @@ func main() {
 		panic(errors.New("you should be input {report} {pubkey}"))
 	}
 
+	fmt.Println(fmt.Sprintf("reportBase64: %v",reportBase64))
+
 	reportBytes, err := base64.StdEncoding.DecodeString(reportBase64)
 	if err != nil {
 		panic(err)

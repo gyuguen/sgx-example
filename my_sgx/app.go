@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/edgelesssys/ego/ecrypto"
 	"github.com/edgelesssys/ego/enclave"
+	myclient "github.com/gyuguen/sgx/my_sgx/client"
 	"github.com/gyuguen/sgx/my_sgx/crypto"
 	"io/ioutil"
 	"os"
@@ -35,6 +36,8 @@ func main() {
 		makeEncryptData()
 	case "decrypt-data":
 		decryptData()
+	case "verify-report-client":
+		myclient.VerifyReportClient()
 	default:
 		panic("command is invalid.(check-path, create-key, get-pubkey, get-report, verify-report)")
 	}

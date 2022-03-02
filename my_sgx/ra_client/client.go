@@ -57,8 +57,8 @@ func main() {
 
 	fmt.Println("")
 	fmt.Println("Check report value")
-	if !bytes.Equal(signerIDBytes, report.SignerID) {
-		panic(errors.New("report data does not match the pubkey"))
+	if !bytes.Equal(signerIDBytes, report.SignerID[:len(signerIDBytes)]) {
+		panic(errors.New("report data does not match the signerID"))
 	}
 	if !bytes.Equal(pubkeyBytes, report.Data[:len(pubkeyBytes)]) {
 		panic(errors.New("report data does not match the pubkey"))

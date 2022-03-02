@@ -1,4 +1,4 @@
-package client
+package main
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"os"
 )
 
-func VerifyReportClient() {
+func main() {
 	reportBase64 := os.Args[2]
 	if reportBase64 == "" {
 		panic(errors.New("you should be input {report} {pubkey}"))

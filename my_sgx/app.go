@@ -218,8 +218,8 @@ func decryptData() {
 }
 
 func getKey() {
-	fmt.Print("UniqueSealKey: ")
-	fmt.Println(enclave.GetUniqueSealKey())
-	fmt.Print("ProductSealKey: ")
-	fmt.Println(enclave.GetProductSealKey())
+	uniKey, uniKeyInfo, _ := enclave.GetUniqueSealKey()
+	fmt.Println(fmt.Sprintf("UniqueKey: %v, UniqueKeyInfo: %v", base64.StdEncoding.EncodeToString(uniKey), base64.StdEncoding.EncodeToString(uniKeyInfo)))
+	productKey, productKeyInfo, _ := enclave.GetProductSealKey()
+	fmt.Println(fmt.Sprintf("ProductIdKey: %v, ProductIdKeyInfo: %v", base64.StdEncoding.EncodeToString(productKey), base64.StdEncoding.EncodeToString(productKeyInfo)))
 }

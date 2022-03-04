@@ -99,7 +99,7 @@ func main() {
 
 	server := http.Server{Addr: serverAddr}
 	fmt.Printf("📎 Token now available under https://%s/token\n", serverAddr)
-	fmt.Printf("👂 Listening on https://%s/secret for secrets...\n", serverAddr)
-	err = server.ListenAndServeTLS("", "")
+	fmt.Printf("👂 Listening on https://%s/pubkey for secrets...\n", serverAddr)
+	err = server.ListenAndServe()
 	fmt.Println(err)
 }

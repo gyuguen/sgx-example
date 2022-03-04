@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/edgelesssys/ego/ecrypto"
-	"github.com/edgelesssys/ego/enclave"
 	handler2 "github.com/gyuguen/sgx/my_server/handler"
 	"io/ioutil"
 	"net/http"
@@ -14,21 +13,11 @@ import (
 )
 
 const (
-	serverAddr             = "0.0.0.0:8080"
-	defaultSealPath        = "/data/.sgx_seel/my_priv_key.seal"
-	attestationProviderURL = "https://shareduks.uks.attest.azure.net"
+	serverAddr      = "0.0.0.0:8080"
+	defaultSealPath = "/data/.sgx_seel/my_priv_key.seal"
 )
 
 var myPrivKey = []byte("my_priv_key")
-
-func getProductSealKey() []byte {
-	key, _, err := enclave.GetProductSealKey()
-	if err != nil {
-		panic(err)
-	}
-
-	return key
-}
 
 func generateAndSealPrivKey() {
 	if _, err := os.Stat(defaultSealPath); os.IsNotExist(err) {
@@ -44,7 +33,7 @@ func generateAndSealPrivKey() {
 			panic(err)
 		}
 
-		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), getProductSealKey(), myPrivKey)
+		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), myPrivKey, nill)
 		if err != nil {
 			panic(err)
 		}
@@ -64,7 +53,7 @@ func getPrivkeyFromSeal() []byte {
 		panic(fmt.Errorf("you have to run 'create-key' first. %e", err))
 	}
 
-	privKeyBytes, err := ecrypto.Decrypt(file, getProductSealKey(), myPrivKey)
+	privKeyBytes, err := ecrypto.Decrypt(file, myPrivKey, nil)
 	if err != nil {
 		panic(err)
 	}

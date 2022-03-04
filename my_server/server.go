@@ -33,7 +33,7 @@ func generateAndSealPrivKey() {
 			panic(err)
 		}
 
-		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), myPrivKey, nill)
+		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), myPrivKey, nil)
 		if err != nil {
 			panic(err)
 		}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/edgelesssys/ego/ecrypto"
+	"github.com/gyuguen/sgx/my_server/crypto"
 	handler2 "github.com/gyuguen/sgx/my_server/handler"
 	"io/ioutil"
 	"net/http"
@@ -33,7 +34,7 @@ func generateAndSealPrivKey() {
 			panic(err)
 		}
 
-		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), myPrivKey, nil)
+		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), crypto.Hash(myPrivKey), nil)
 		if err != nil {
 			panic(err)
 		}
@@ -53,7 +54,7 @@ func getPrivkeyFromSeal() []byte {
 		panic(fmt.Errorf("you have to run 'create-key' first. %e", err))
 	}
 
-	privKeyBytes, err := ecrypto.Decrypt(file, myPrivKey, nil)
+	privKeyBytes, err := ecrypto.Decrypt(file, crypto.Hash(myPrivKey), nil)
 	if err != nil {
 		panic(err)
 	}

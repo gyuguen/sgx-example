@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/edgelesssys/ego/ecrypto"
 	"github.com/edgelesssys/ego/enclave"
+	handler2 "github.com/gyuguen/sgx/my_server/handler"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -83,23 +84,34 @@ func getPubkey() []byte {
 
 func main() {
 	generateAndSealPrivKey()
-
 	pubkey := getPubkey()
 
-	// Cerate an Azure Attestation Token.
-	token, err := enclave.CreateAzureAttestationToken(pubkey, attestationProviderURL)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("🆗 Created an Microsoft Azure Attestation Token.")
-
 	// Create HTTPS server.
-	http.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(token)) })
+	http.Handle("/token", handler2.NewTokenHandler(pubkey))
 	http.HandleFunc("/pubkey", func(w http.ResponseWriter, r *http.Request) { w.Write(pubkey) })
+	http.Handle("/report", handler2.NewReportHandler(pubkey))
+	http.Handle("/remote-report-verify", handler2.NewReportHandler(pubkey))
 
 	server := http.Server{Addr: serverAddr}
 	fmt.Printf("📎 Token now available under https://%s/token\n", serverAddr)
 	fmt.Printf("👂 Listening on https://%s/pubkey for secrets...\n", serverAddr)
-	err = server.ListenAndServe()
+	err := server.ListenAndServe()
 	fmt.Println(err)
+}
+
+func HttpGet(url string) []byte {
+	client := http.Client{}
+	resp, err := client.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		panic(resp.Status)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	return body
 }

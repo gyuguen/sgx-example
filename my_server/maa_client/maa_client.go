@@ -7,47 +7,41 @@ import (
 	"flag"
 	"fmt"
 	"github.com/edgelesssys/ego/attestation"
+	"github.com/gyuguen/sgx/my_server/types"
 	"io/ioutil"
 	"net/http"
 )
 
-const attestationProviderURL = "https://shareduks.uks.attest.azure.net"
-
 func main() {
-	serverAddr := flag.String("a", "localhost:8080", "server address")
+	serverAddr := flag.String("a", "20.212.166.103:8080", "server address")
 	flag.Parse()
 
-	serverURL := "https://" + *serverAddr
+	serverURL := "http://" + *serverAddr
 	tokenBytes := httpGet(serverURL + "/token")
 	fmt.Printf("🆗 Loaded server attestation token from %s.\n", serverURL+"/token")
 
-	report, err := attestation.VerifyAzureAttestationToken(string(tokenBytes), attestationProviderURL)
+	report, err := attestation.VerifyAzureAttestationToken(string(tokenBytes), types.AttestationProviderURL)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("✅ Azure Attestation Token verified.")
 
-	// Verify the report. ProductID, SecurityVersion and Debug were defined in
-	// the enclave.json, and included in the servers binary.
-	if err := verifyReportValues(report); err != nil {
-		panic(err)
-	}
+	verifyReportValues(report)
+
+	pubkeyBytes := httpGet(serverURL + "/pubkey")
+	fmt.Printf("Server Pubkey: %s", base64.StdEncoding.EncodeToString(pubkeyBytes))
 
 }
 
-func verifyReportValues(report attestation.Report) error {
+func verifyReportValues(report attestation.Report) {
 	fmt.Println("## Report ##")
 	fmt.Println(fmt.Sprintf("SignerId: %s", hex.EncodeToString(report.SignerID)))
 	fmt.Println(fmt.Sprintf("TCBStatus: %s", report.TCBStatus))
 	fmt.Println(fmt.Sprintf("UniqueID: %s", hex.EncodeToString(report.UniqueID)))
 	fmt.Println(fmt.Sprintf("ProductID: %v", binary.LittleEndian.Uint16(report.ProductID)))
 	fmt.Println(fmt.Sprintf("SecurityVersion: %v", report.SecurityVersion))
-	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data[:32])))
-
-	// For production, you must also verify that report.Debug == false
-
-	return nil
+	fmt.Println(fmt.Sprintf("Pubkey: %s", base64.StdEncoding.EncodeToString(report.Data)))
 }
 
 func httpGet(url string) []byte {

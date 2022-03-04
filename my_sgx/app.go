@@ -27,6 +27,8 @@ func main() {
 		createKey()
 	case "get-pubkey":
 		getPubkey()
+	case "get-key":
+		getKey()
 	case "get-report":
 		getReport()
 	case "verify-report":
@@ -213,4 +215,11 @@ func decryptData() {
 	}
 
 	fmt.Println(string(plainTextBytes))
+}
+
+func getKey() {
+	fmt.Print("UniqueSealKey: ")
+	fmt.Println(enclave.GetUniqueSealKey())
+	fmt.Print("ProductSealKey: ")
+	fmt.Println(enclave.GetProductSealKey())
 }

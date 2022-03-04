@@ -18,7 +18,7 @@ const (
 	defaultSealPath = "/data/.sgx_seel/my_priv_key.seal"
 )
 
-var myPrivKey = []byte("my_priv_key")
+var myPrivKey = crypto.Hash([]byte("my_priv_key"))
 
 func generateAndSealPrivKey() {
 	if _, err := os.Stat(defaultSealPath); os.IsNotExist(err) {
@@ -34,7 +34,7 @@ func generateAndSealPrivKey() {
 			panic(err)
 		}
 
-		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), crypto.Hash(myPrivKey), nil)
+		encPriv, err := ecrypto.Encrypt(privKey.Serialize(), myPrivKey, nil)
 		if err != nil {
 			panic(err)
 		}
@@ -54,7 +54,7 @@ func getPrivkeyFromSeal() []byte {
 		panic(fmt.Errorf("you have to run 'create-key' first. %e", err))
 	}
 
-	privKeyBytes, err := ecrypto.Decrypt(file, crypto.Hash(myPrivKey), nil)
+	privKeyBytes, err := ecrypto.Decrypt(file, myPrivKey, nil)
 	if err != nil {
 		panic(err)
 	}
